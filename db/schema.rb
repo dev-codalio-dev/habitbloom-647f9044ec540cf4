@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_02_134343) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_02_134433) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -83,6 +83,47 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_02_134343) do
     t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
     t.index ["sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_id"
     t.index ["sluggable_type"], name: "index_friendly_id_slugs_on_sluggable_type"
+  end
+
+  create_table "habit_completions", force: :cascade do |t|
+    t.date "completion_date", null: false
+    t.string "status", default: "completed", null: false
+    t.bigint "habit_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["habit_id", "completion_date"], name: "index_habit_completions_on_habit_id_and_completion_date", unique: true
+    t.index ["habit_id"], name: "index_habit_completions_on_habit_id"
+  end
+
+  create_table "habits", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.string "frequency_type", null: false
+    t.jsonb "frequency_value", default: {}
+    t.string "icon_name"
+    t.string "color_scheme"
+    t.date "start_date", null: false
+    t.boolean "active", default: true
+    t.bigint "user_id", null: false
+    t.bigint "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_habits_on_organization_id"
+    t.index ["user_id"], name: "index_habits_on_user_id"
+  end
+
+  create_table "icons", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_icons_on_name", unique: true
+  end
+
+  create_table "motivational_messages", force: :cascade do |t|
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["content"], name: "index_motivational_messages_on_content", unique: true
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -301,6 +342,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_02_134343) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "habit_completions", "habits"
+  add_foreign_key "habits", "organizations"
+  add_foreign_key "habits", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
